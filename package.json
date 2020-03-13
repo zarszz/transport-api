@@ -1,0 +1,40 @@
+{
+  "name": "transportapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "create-dev-tables": "npx babel-node ./src/app/db/dev/dbConnection createAllTables",
+    "start": "npx nodemon --watch . --exec babel-node -- ./src/server",
+    "setup": "npx npm-run-all -p start create-dev-tables",
+    "drop-user-table": "npx babel-node ./src/app/db/dev/dbConnection dropUserTable",
+    "create-user-table": "npx babel-node ./src/app/db/dev/dbConnection createUserTable",
+    "build": "babel src -d dist --source-maps"
+  },
+  "author": "ganjarggt",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/polyfill": "^7.8.3",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "esm": "^3.2.25",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "make-runnable": "^1.3.6",
+    "moment": "^2.24.0",
+    "npm-run-all": "^4.1.5",
+    "pg": "^7.18.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.6",
+    "@babel/node": "^7.8.4",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "babel-watch": "^7.0.0",
+    "eslint": "^6.8.0"
+  }
+}
