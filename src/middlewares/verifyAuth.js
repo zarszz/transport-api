@@ -1,12 +1,10 @@
 import jwt, { decode } from 'jsonwebtoken';
-import dotenv from 'dotenv';
 import {
     errorMessage, status
 } from '../helpers/status';
 
-import env from '../../env'
+import env from '../env'
 
-dotenv.config()
 
 /**
  * Verify token
@@ -22,7 +20,7 @@ const verifyToken = async (req, res, next) => {
         return res.status(status.bad).send(errorMessage);
     }
     try {
-        const decoded = jwt.verify(token, process.env.secret);
+        const decoded = jwt.verify(token, env.SECRET);
         req.user = {
             email: decoded.email,
             user_id: decoded.user_id,

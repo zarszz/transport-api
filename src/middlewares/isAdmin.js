@@ -1,14 +1,10 @@
 import jwt, { decode } from 'jsonwebtoken';
 
-import dotenv from 'dotenv';
-
 import {
     errorMessage, status
 } from '../helpers/status';
 
-import env from '../../env'
-
-dotenv.config()
+import env from '../env'
 
 /**
  * verify is user is admin
@@ -23,7 +19,7 @@ const isAdmin = async (req, res, next) => {
         errorMessage.error = 'Token not provided';
     }
     try {
-        const decoded_data = jwt.verify(token, process.env.secret);
+        const decoded_data = jwt.verify(token, env.SECRET);
         const userIsAdmin = decoded_data.is_admin;
         if(userIsAdmin){
             next();

@@ -2,11 +2,11 @@ import express from 'express';
 import 'babel-polyfill';
 import cors from 'cors';
 import env from './env';
-import usersRoute from './app/routes/usersRoute';
-import adminRoute from './app/routes/adminRoute';
-import tripRoute from './app/routes/tripRoute';
-import busRoute from './app/routes/busRoute';
-import bookingRoute from './app/routes/bookingRoute';
+import usersRoute from './routes/usersRoute';
+import adminRoute from './routes/adminRoute';
+import tripRoute from './routes/tripRoute';
+import busRoute from './routes/busRoute';
+import bookingRoute from './routes/bookingRoute';
 
 const app = express();
 

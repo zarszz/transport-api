@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import env from '../../env';
+import env from '../env';
 import jwt from 'jsonwebtoken';
 
 /**
