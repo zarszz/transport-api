@@ -1,6 +1,8 @@
 import moment from "moment";
 import dbQuery from "../db/dev/dbQuery";
 
+import models from '../models';
+
 import {
     empty
 } from '../helpers/validations';
@@ -8,6 +10,8 @@ import {
 import {
     errorMessage, successMessage, status, trip_statuses
 } from '../helpers/status';
+
+const Trip = models.trip;
 
 /**
  * Create a Trip
@@ -24,23 +28,13 @@ const createTrip = async (req, res) => {
         errorMessage.error = 'Sorry you are unauthorized to create a trip';
         return res.status(status.unauthorized).send(errorMessage);
     }
-    const created_on = moment(new Date());
 
     if (empty(bus_id) || empty(origin) || empty(destination) || empty(trip_date) || empty(fare)) {
-        errorMessage.error = 'Origin, destination, trip date, and fare cannot be empty';
+        errorMessage.error = 'origin, destination, trip date, and fare cannot be empty';
         return res.status(status.error).send(errorMessage);
     }
-    const createTripQuery = `INSERT INTO
-    trip(bus_id, origin, destination, trip_date, fare, created_on)
-    VALUES($1, $2, $3, $4, $5, $6) 
-    returning *;`;
-    const values = [
-        bus_id, origin, destination, trip_date, fare, created_on
-    ];
     try {
-        const { rows } = await dbQuery.query(createTripQuery, values);
-        const dbResponse = rows[0];
-        successMessage.data = dbResponse;
+        await Trip.create(req.body);
         return res.status(status.created).send(successMessage);
     } catch (error) {
         errorMessage.error = 'Unable to create trip';
@@ -55,15 +49,13 @@ const createTrip = async (req, res) => {
  * @returns {object} trips array
  */
 const getAllTrips = async (req, res) => {
-    const getAllTripsQuery = `SELECT * FROM trip ORDER BY id DESC`;
-    try {
-        const { rows } = await dbQuery.query(getAllTripsQuery);
-        const dbResponse = rows[0];
-        if (!dbResponse) {
+    try {        
+        const rows = await Trip.findAll();        
+        if (!rows) {
             errorMessage.error = 'There are no trips';
             return res.status(status.notFound).send(errorMessage);
         }
-        successMessage.data = dbResponse;
+        successMessage.data = rows;
         return res.status(status.success).send(successMessage);
     } catch (error) {
         errorMessage.error = 'Operation was not successful';
@@ -85,15 +77,15 @@ const cancelTrip = async (req, res) => {
         errorMessage.error = 'Sorry you are unauthorized to cancel a trip';
         return res.status(status.unauthorized).send(errorMessage);
     }
-    const cancelTripQuery = 'UPDATE trip SET status=$1 WHERE id=$2 returning *';
-    const values = [cancelled, tripId];
     try {
-        const { rows } = await dbQuery.query(cancelTripQuery, values);
-        const dbResponse = rows[0];
-        if (!dbResponse) {
+        const rows = await Trip.findOne({ where: { id: tripId } });
+        if (!rows) {
             errorMessage.error = 'There is no trip with that id';
             return res.status(status.notFound).send(errorMessage);
         }
+        await Trip.update({
+            status: cancelled
+        }, { where: { id: tripId } });
         successMessage.data = {};
         successMessage.data.message = 'Trip cancelled successfully';
         return res.status(status.success).send(successMessage);
@@ -110,16 +102,14 @@ const cancelTrip = async (req, res) => {
  * @returns {object} returned trips
  */
 const filterTripByOrigin = async (req, res) => {
-    const origin = req.query;
-    const findTripQuery = `SELECT * FROM trip WHERE origin=$1 ORDER BY id DESC`;
+    const { origin } = req.body;
     try {
-        const { rows } = await dbQuery.query(findTripQuery, [origin]);
-        const dbResponse = rows;
-        if (!dbResponse[0]) {
+        const rows = await Trip.findAll({ where: { origin: origin } });
+        if (rows.length === 0) {
             errorMessage.error = 'No trips with that origin';
             return res.status(status.notFound).send(errorMessage);
         }
-        successMessage.data = dbResponse;
+        successMessage.data = rows;
         return res.status(status.success).send(successMessage);
     } catch (error) {
         errorMessage.error = 'Operation was not successful';
@@ -134,16 +124,14 @@ const filterTripByOrigin = async (req, res) => {
  * @returns {object} returned trips
  */
 const filterTripByDestination = async (req, res) => {
-    const destination = req.query;
-    const findTripQuery = `SELECT * FROM trip WHERE destination=$1 ORDER BY id DESC`;
+    const { destination } = req.body;
     try {
-        const { rows } = await dbQuery.query(findTripQuery, [destination]);
-        const dbResponse = rows;
-        if (!dbResponse[0]) {
+        const rows = await Trip.findAll({ where: { destination: destination } });
+        if (rows.length === 0) {
             errorMessage.error = 'No trips with that destination';
             return res.status(status.notFound).send(errorMessage);
         }
-        successMessage.data = dbResponse;
+        successMessage.data = rows;
         return res.status(status.success).send(successMessage);
     } catch (error) {
         errorMessage.error = 'Operation was not successful';

@@ -1,0 +1,13 @@
+{
+  "development": {
+    "username": "ucok",
+    "password": "ucok",
+    "database": "transport",
+    "host": "localhost",
+    "dialect": "postgres",
+    "define": {
+      "timestamps": true,
+      "freezeTableName": true
+    }
+  }
+}

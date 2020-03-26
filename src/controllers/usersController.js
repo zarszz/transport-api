@@ -1,5 +1,4 @@
-import moment from 'moment';
-import dbQuery from '../db/dev/dbQuery';
+import models from "../models";
 
 import {
     hashPassword,
@@ -14,6 +13,8 @@ import {
     errorMessage, successMessage, status
 } from '../helpers/status';
 
+const Users = models.users;
+
 /**
  * Create A User
  * 
@@ -26,8 +27,6 @@ const createUser = async (req, res) => {
     const {
         email, first_name, last_name, password
     } = req.body;
-
-    const created_on = moment(new Date());
 
     if (isEmpty(email) || isEmpty(first_name) || isEmpty(last_name) || isEmpty(password)) {
         errorMessage.error = 'Email, first name, last name, and password cannot be empty !!';
@@ -42,24 +41,13 @@ const createUser = async (req, res) => {
         return res.status(status.bad).send(errorMessage)
     }
     const hashedPassword = hashPassword(password);
-    const createUserQuery = `INSERT INTO
-    users(email, first_name, last_name, password, created_on)
-    VALUES($1, $2, $3, $4, $5)
-    returning *`;
-    const values = [
-        email,
-        first_name,
-        last_name,
-        hashedPassword,
-        created_on
-    ];
     try {
-        const { rows } = await dbQuery.query(createUserQuery, values);
-        const dbResponse = rows[0];
-        delete dbResponse.password;
-        const token = generateUserToken(dbResponse.email, dbResponse.id, dbResponse.is_admin, dbResponse.first_name, dbResponse.last_name);
-        successMessage.data = dbResponse;
-        successMessage.data.token = token;
+        await Users.create({
+            email: email,
+            password: hashedPassword,
+            first_name: first_name,
+            last_name: last_name
+        }, { fields: ['email', 'password', 'first_name', 'last_name'] })
         return res.status(status.created).send(successMessage);
     } catch (error) {
         if (error.routine === '_bt_check_unique') {
@@ -85,21 +73,21 @@ const signinUser = async (req, res) => {
         errorMessage.error = 'Please enter a valid Email or Password';
         return res.status(status.bad).send(errorMessage);
     }
-    const signinUserQuery = 'SELECT * FROM users WHERE email=$1';
     try {
-        const { rows } = await dbQuery.query(signinUserQuery, [email]);
-        const dbResponse = rows[0];
-        if (!dbResponse) {
+        const raw_rows = await Users.findOne({ where: { email: email } });
+        const rows = raw_rows['dataValues'];
+        if (!rows) {
             errorMessage.error = 'User with this email does not exist';
             return res.status(status.notFound).send(errorMessage);
         }
-        if (!comparePassword(dbResponse.password, password)) {
+        if (!comparePassword(rows.password, password)) {
             errorMessage.error = 'The password you provided is incorrect' // !TODO fix error message management
             return res.status(status.bad).send(errorMessage);
         }
-        const token = generateUserToken(dbResponse.email, dbResponse.id, dbResponse.is_admin, dbResponse.first_name, dbResponse.last_name);
-        delete dbResponse.password;
-        successMessage.data = dbResponse;
+        const token = generateUserToken(rows.email, rows.id, rows.is_admin, rows.first_name, rows.last_name);
+        delete rows.password;
+        delete rows.is_admin;
+        successMessage.data = rows;
         successMessage.data.token = token;
         return res.status(status.created).send(successMessage);
     } catch (error) {
@@ -131,16 +119,17 @@ const updateUser = async (req, res) => {
         errorMessage.error = 'Email format is not valid';
         return res.status(status.bad).send(errorMessage);
     }
-    const updateUserQuery = `UPDATE users
-    SET email=$1, first_name=$2, last_name=$3 WHERE id=$4
-    returning *`;
-    const values = [email, first_name, last_name, id];
     try {
-        const { rows } = await dbQuery.query(updateUserQuery, values);
-        const dbResponse = rows[0];
-        delete dbResponse.password;
-        delete dbResponse.is_admin;
-        successMessage.data = dbResponse;
+        await Users.update({
+            email: email,
+            first_name: first_name,
+            last_name: last_name
+        }, { where: { id: id } });
+        const raw_rows = await Users.findOne({ where: { id: id } });
+        const rows = raw_rows['dataValues'];
+        delete rows.password;
+        delete rows.is_admin;
+        successMessage.data = rows;
         return res.status(status.success).send(successMessage);
     } catch (error) {
         errorMessage.error = 'An error occured';
@@ -155,12 +144,14 @@ const updateUser = async (req, res) => {
  * @returns {object} Array of user
  */
 const getAllUsersData = async (req, res) => {
-    const getDataQuery = 'SELECT * FROM users';
     try {
-        const { rows } = await dbQuery.query(getDataQuery);
-        const dbResponse = rows;
-        delete dbResponse.password;
-        successMessage.data = dbResponse;
+        const rows = await Users.findAll({
+            attributes: ['id', 'email', 'first_name',
+                'last_name',
+                ['createdAt', 'created_at'],
+                ['updatedAt', 'updated_at']]
+        });
+        successMessage.data = rows;
         return res.status(status.success).send(successMessage);
     } catch (error) {
         errorMessage.error = 'An error occured';
@@ -176,22 +167,25 @@ const getAllUsersData = async (req, res) => {
  */
 const deleteUser = async (req, res) => {
     const { userId } = req.params;
-    const deleteUserQuery = 'DELETE FROM users WHERE id=$1 returning *;';
     try {
-        const { rows } = await dbQuery.query(deleteUserQuery, [userId]);
-        const dbResponse = rows[0];        
-        if (!dbResponse) {
+        const user = await Users.findOne({ where: { id: userId } });
+        if (!user) {
             errorMessage.error = 'User not found';
             return res.status(status.notFound).send(errorMessage);
         }
+        await Users.destroy({
+            where: {
+                id: userId
+            }
+        });
         successMessage.data = {}
-        successMessage.data.message = 'User deletetion success';
+        successMessage.data.message = 'user deletetion success';
         return res.status(status.success).send(successMessage);
     } catch (error) {
         errorMessage.error = 'An error occured';
         return res.status(status.error).send(errorMessage);
     }
-} 
+}
 
 export {
     createUser,
