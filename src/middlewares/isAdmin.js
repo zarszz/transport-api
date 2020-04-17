@@ -15,20 +15,21 @@ import env from '../env'
  */
 const isAdmin = async (req, res, next) => {
     const { token } = req.headers;
-    if(!token){
+    if (!token) {
         errorMessage.error = 'Token not provided';
     }
     try {
-        const decoded_data = jwt.verify(token, env.SECRET);
+        var secretKey = env.SECRET ? env.SECRET : process.env.TRANSPORT_SECRET_KEY;
+        const decoded_data = jwt.verify(token, secretKey);
         const userIsAdmin = decoded_data.is_admin;
-        if(userIsAdmin){
+        if (userIsAdmin) {
             next();
         } else {
-            errorMessage.error = "You're not authorized to doing this action";
+            errorMessage.error = "You are not authorized to doing this action";
             return res.status(status.unauthorized).send(errorMessage);
         }
-    } catch (error) {
-        errorMessage.error = 'Authentication failed';
+    } catch (errror) {
+        errorMessage.error = "You are not authorized to doing this action";
         return res.status(status.unauthorized).send(errorMessage);
     }
 }

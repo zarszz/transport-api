@@ -3,7 +3,7 @@ import env from '../env';
 import jwt from 'jsonwebtoken';
 
 /**
- * 
+ *
  * @param {string} password
  * @returns {string} hashed password
 */
@@ -12,7 +12,7 @@ const salt = bcrypt.genSaltSync(saltRounds);
 const hashPassword = password => bcrypt.hashSync(password, salt);
 
 /**
- * 
+ *
  * @param {string} hashedPassword
  * @param {string} password
  * @returns {Boolean} True or False
@@ -47,7 +47,7 @@ const validatePassword = (password) => {
  * isEmpty helper method
  * @param {string, integer} input
  * @returns {Boolean} True or False
- * 
+ *
  */
 const isEmpty = (input) => {
     if (input === undefined || input === '') {
@@ -62,7 +62,7 @@ const isEmpty = (input) => {
  * empty helper method
  * @param {string, integer} input
  * @returns {Boolean} True or False
- * 
+ *
  */
 const empty = (input) => {
     if (input === undefined || input === '') {
@@ -76,14 +76,14 @@ const empty = (input) => {
  * @returns {string} token
  */
 const generateUserToken = (email, id, is_admin, first_name, last_name) => {
+    var secretKey = env.SECRET ? env.SECRET : process.env.TRANSPORT_SECRET_KEY;
     const token = jwt.sign({
         email,
         user_id: id,
         is_admin,
         first_name,
         last_name,
-    },
-        env.SECRET, { expiresIn: '3d' });
+    }, secretKey, { expiresIn: '3d' });
     return token
 }
 

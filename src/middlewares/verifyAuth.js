@@ -16,11 +16,12 @@ import env from '../env'
 const verifyToken = async (req, res, next) => {
     const { token } = req.headers;
     if(!token) {
-        errorMessage.error = 'Token not provided';
+        errorMessage.error = 'token not provided';
         return res.status(status.bad).send(errorMessage);
     }
     try {
-        const decoded = jwt.verify(token, env.SECRET);
+        var secretKey = env.SECRET || process.env.TRANSPORT_SECRET_KEY;
+        const decoded = jwt.verify(token, secretKey);
         req.user = {
             email: decoded.email,
             user_id: decoded.user_id,
@@ -30,7 +31,7 @@ const verifyToken = async (req, res, next) => {
         };
         next();
     } catch (error) {
-        errorMessage.error = 'Authentication Failed';
+        errorMessage.error = 'authentication failed';
         return res.status(status.unauthorized).send(errorMessage);
     }
 }

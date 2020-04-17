@@ -1,13 +1,13 @@
 import express from 'express';
 
 import { createAdmin, updateUserToAdmin } from '../controllers/adminController';
-import verifyAuth from '../middlewares/verifyAuth';
+import isAdmin from '../middlewares/verifyAuth';
 
 const router = express.Router();
 
 // users Routes
 
-router.post('/admin/signup', verifyAuth, createAdmin);
-router.put('/user/:id/admin', verifyAuth, updateUserToAdmin);
+router.post('/admin/signup', isAdmin, createAdmin);
+router.put('/user/:id/admin', isAdmin, updateUserToAdmin);
 
 export default router;

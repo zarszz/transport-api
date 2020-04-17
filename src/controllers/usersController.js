@@ -17,7 +17,7 @@ const Users = models.users;
 
 /**
  * Create A User
- * 
+ *
  * @param {object} req
  * @param {object} res
  * @returns {object} reflection object
@@ -29,12 +29,12 @@ const createUser = async (req, res) => {
     } = req.body;
 
     if (isEmpty(email) || isEmpty(first_name) || isEmpty(last_name) || isEmpty(password)) {
-        errorMessage.error = 'Email, first name, last name, and password cannot be empty !!';
+        errorMessage.error = 'email, first name, last name, and password cannot be empty';
         return res.status(status.bad).send(errorMessage);
     }
     if (!isValidEmail(email)) {
-        errorMessage.error = 'Please enter a valid Email';
-        return res.status(status.bad).senMessage(errorMessage);
+        errorMessage.error = 'please enter a valid email';
+        return res.status(status.bad).send(errorMessage);
     }
     if (!validatePassword(password)) {
         errorMessage.error = 'Password must be more than five(5) characters';
@@ -66,22 +66,22 @@ const createUser = async (req, res) => {
 const signinUser = async (req, res) => {
     const { email, password } = req.body;
     if (isEmpty(email) || isEmpty(password)) {
-        errorMessage.error = 'Email or password detail is missing';
+        errorMessage.error = 'email or password detail is missing';
         return res.status(status.bad).send(errorMessage);
     }
     if (!isValidEmail(email) || !validatePassword(password)) {
-        errorMessage.error = 'Please enter a valid Email or Password';
+        errorMessage.error = 'please enter a valid email and password';
         return res.status(status.bad).send(errorMessage);
     }
     try {
         const raw_rows = await Users.findOne({ where: { email: email } });
-        const rows = raw_rows['dataValues'];
-        if (!rows) {
-            errorMessage.error = 'User with this email does not exist';
+        if (!raw_rows) {
+            errorMessage.error = 'user with this email does not exist';
             return res.status(status.notFound).send(errorMessage);
         }
+        const rows = raw_rows['dataValues'];
         if (!comparePassword(rows.password, password)) {
-            errorMessage.error = 'The password you provided is incorrect' // !TODO fix error message management
+            errorMessage.error = 'the email or password is incorrect' // !TODO fix error message management
             return res.status(status.bad).send(errorMessage);
         }
         const token = generateUserToken(rows.email, rows.id, rows.is_admin, rows.first_name, rows.last_name);
@@ -91,10 +91,8 @@ const signinUser = async (req, res) => {
         successMessage.data.token = token;
         return res.status(status.created).send(successMessage);
     } catch (error) {
-        if (error.routine === '_bt_check_unique') {
-            errorMessage.error = 'Operation was not successful';
-            return res.status(status.conflict).send(errorMessage);
-        }
+        errorMessage.error = 'Operation was not successful';
+        return res.status(status.conflict).send(errorMessage);
     }
 }
 
@@ -112,7 +110,7 @@ const updateUser = async (req, res) => {
     } = req.body;
 
     if (isEmpty(email) || isEmpty(first_name) || isEmpty(last_name)) {
-        errorMessage.error = 'Email, first name, or last name must not to be blank';
+        errorMessage.error = 'email, first name, or last name must not blank';
         return res.status(status.bad).send(errorMessage);
     }
     if (!isValidEmail(email)) {
@@ -179,7 +177,7 @@ const deleteUser = async (req, res) => {
             }
         });
         successMessage.data = {}
-        successMessage.data.message = 'user deletetion success';
+        successMessage.data.message = 'user delete success';
         return res.status(status.success).send(successMessage);
     } catch (error) {
         errorMessage.error = 'An error occured';

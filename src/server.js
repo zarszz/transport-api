@@ -24,4 +24,4 @@ app.listen(env.NODE_PORT).on('listening', () => {
     console.log(`🚀 are live on ${env.NODE_PORT}`);
 });
 
-export default app;
+module.exports = app;
