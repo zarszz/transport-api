@@ -18,14 +18,15 @@ const Buses = models.buses;
  */
 const addBusDetails = async (req, res) => {
     if (empty(req.body.number_plate) || empty(req.body.manufacturer) || empty(req.body.model) || empty(req.body.year) || empty(req.body.capacity)) {
-        errorMessage.error = 'All fields are required';
+        errorMessage.error = 'all fields are required';
         return res.status(status.bad).send(errorMessage);
     }
     try {
         await Buses.create(req.body);
-        return res.status(status.success).send(successMessage);
+        successMessage.data = req.body;
+        return res.status(status.created).send(successMessage);
     } catch (error) {
-        errorMessage.error = 'An error occured';
+        errorMessage.error = 'an error occured';
         return res.status(status.error).send(errorMessage);
     }
 };
@@ -59,25 +60,24 @@ const getAllBuses = async (req, res) => {
  * @return {object} Bus object
  */
 const updateBus = async (req, res) => {
-    if (empty(req.body.number_plate) || empty(req.body.manufacturer) || 
-        empty(req.body.model) || empty(req.body.year) || empty(req.body.capacity) 
+    if (empty(req.body.number_plate) || empty(req.body.manufacturer) ||
+        empty(req.body.model) || empty(req.body.year) || empty(req.body.capacity)
         || empty(req.body.id)) {
-        errorMessage.error = 'All fields are required';
-        return res.status(status.error).send(errorMessage);
+        errorMessage.error = 'all fields are required';
+        return res.status(status.bad).send(errorMessage);
     }
 
     try {
         const rows = await Buses.findOne({ where: { id: req.body.id } });
         if (!rows) {
-            errorMessage.error = 'Bus not found';
+            errorMessage.error = 'bus not found';
             return res.status(status.notFound).send(errorMessage);
         }
         await Buses.update(req.body, { where: { id: req.body.id } });
-        const dbResponse = rows;
-        successMessage.data = dbResponse;
+        successMessage.data = req.body;
         return res.status(status.success).send(successMessage);
     } catch (error) {
-        errorMessage.error = 'An error occured';
+        errorMessage.error = 'an error occured';
         return res.status(status.error).send(errorMessage);
     }
 }
@@ -86,14 +86,14 @@ const updateBus = async (req, res) => {
  * Delete bus
  * @param {object} req
  * @param {object} res
- * @returns {void} response bus deleted successfully 
+ * @returns {void} response bus deleted successfully
  */
 const deleteBus = async (req, res) => {
     const { busId } = req.params;
     try {
         const bus = await Buses.findOne({ where: { id: busId } });
         if (!bus) {
-            errorMessage.error = 'Bus not found';
+            errorMessage.error = 'bus not found';
             return res.status(status.notFound).send(errorMessage);
         }
         await Buses.destroy({
@@ -101,10 +101,10 @@ const deleteBus = async (req, res) => {
                 id: busId
             }
         });
-        successMessage.message = 'Delete bus successfully';
+        successMessage.message = 'delete bus successfully';
         return res.status(status.success).send(successMessage);
     } catch (error) {
-        errorMessage.error = 'An error occured';
+        errorMessage.error = 'an error occured';
         return res.status(status.error).send(errorMessage);
     }
 }

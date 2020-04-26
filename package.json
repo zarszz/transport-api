@@ -12,7 +12,7 @@
     "build": "babel src -d dist --source-maps",
     "test-db": "npx nodemon --watch . --exec babel-node -- ./src/models/Users",
     "drop-all-table": "npx babel-node ./src/db/dev/dbConnection dropAllTables",
-    "test": "cd src && ../node_modules/mocha/bin/mocha --require babel-core/register"
+    "test": "cd src && ../node_modules/mocha/bin/mocha 'test/**/*.js' --require babel-core/register"
   },
   "author": "ganjarggt",
   "license": "ISC",
