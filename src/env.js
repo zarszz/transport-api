@@ -8,5 +8,8 @@ export default {
   DB_NAME: process.env.DB_NAME,
   NODE_PORT: process.env.NODE_PORT,
   SECRET: process.env.SECRET,
-  DB_DIALECT: process.env.DB_DIALECT
+  DB_DIALECT: process.env.DB_DIALECT,
+  REDIS_HOST: process.env.REDIS_HOST,
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  REDIS_PORT: process.env.REDIS_PORT
 }

@@ -14,7 +14,7 @@ if (NODE_ENV === 'production') {
     dialect: process.env.DB_DIALECT
   });
 } else {
-  const config = require('../config/config').default.development;
+  const config = require('../config/config').development;
   sequelize = new Sequelize(config.database, config.username, config.password, {
     host: config.host,
     dialect: config.dialect
