@@ -11,7 +11,7 @@ const router = express.Router();
 router.post('/auth/signup', createUser); // CREATE
 router.post('/auth/signin', signinUser);
 router.get('/user', isAdmin, getAllUsersData); // READ
-router.put('/user/:userId', verifyAuth,  updateUser); // UPDATE
+router.put('/user', verifyAuth,  updateUser); // UPDATE
 router.delete('/user/:userId', isAdmin, deleteUser); // DELETE
 
 export default router;
