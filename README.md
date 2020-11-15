@@ -9,6 +9,7 @@ API for bus booking, builded with Node.js
 - [x] Create CRUD operation in booking context
 - [x] Create CRUD operation in trip context
 - [x] Implement authentication with JWT
-- [ ] Implement authorization
+- [x] Implement stateless session authentication
+- [ ] Implement object level authorization
 - [x] Implement Connection to database(using postgres)
 - [x] Implement ORM(using sequelize)

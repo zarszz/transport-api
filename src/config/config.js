@@ -1,7 +1,7 @@
 import env from '../env';
 
-export default {
-    'development': {
+module.exports = {
+    development: {
         database: env.DB_NAME,
         username: env.DB_USER,
         password: env.DB_PASSWORD,
